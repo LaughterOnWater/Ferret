@@ -54,9 +54,9 @@
 # The tools have been collapsed together for use here.
 #
 # Instructions:
-# Move this script in your home directory, perhaps
+# Move this script into your home directory, perhaps
 # where you have other shell scripts that you have
-# either created, perhaps '~/admin/scripts'.
+# either created or downloaded, perhaps '~/admin/scripts'.
 # Create an alias in your .bash_profile 
 # alias ferret="~/admin/scripts/ferret.sh"
 # Manually add the alias in shell for your current
