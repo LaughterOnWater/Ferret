@@ -48,6 +48,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF 
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+# Attributions:
+# Some of this code has been taken from Dreamhost's wiki page:
+# http://wiki.dreamhost.com/Detecting_intrusions
+# The tools have been collapsed together for use here.
+#
 # Instructions:
 # Move this script in your home directory, perhaps
 # where you have other shell scripts that you have
