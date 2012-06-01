@@ -83,7 +83,15 @@ NAME
 	ferret - discover various information from dreamhost logs
 
 SYNOPSIS
-	ferret [ -c | -i | -l | -m | -h ] OR [ -u | -e domain ]
+	ferret [ -c | --chkd	# check disk
+			 -l | --list	# list available domains
+			 -m | --mods	# files modified in the last 24 hours
+			 -u | --uip		# ips used to log in to ftp or shell
+			 -h | --help	# more in-depth help text ]
+			 OR 
+	ferret [ -w | --web	domain	# list 200's sorted, counted
+			 -i | --ips	domain	# unique IP's
+			 -e | --err domain	# list 404's sorted, counted ]
 
 DESCRIPTION
 	Ferret is based on the Detection Intrusion wiki page found here:
@@ -102,15 +110,15 @@ This script is provided mostly for small and dev sites that
 
 OPTIONS
 
+	-l List user's domains with error logs
+
 	-c Check for large folder sizes. Anything out of the ordinary.
 
-	-m Check file modification times. 
+	-m Check file modification times for this user.
 	
 	-i Check what IP addresses are visiting your domain most.
 
-	-l List user's domains with error logs
-
-	-u List and count all unique requests in the past 30 days
+	-w List and count all unique requests in the past 30 days
 	
 	-e List and count all unique requests that created a 404 response
 	
@@ -143,8 +151,16 @@ EXAMPLES
 
 function shortreadme {
 	# If condition and / or file existence fail, say this.
-	echo "ferret [ -c | -i | -l | -m ] OR [ -u | -e domain ]
-	"
+	echo "	ferret [ -c | --chkd	# check disk
+			 -l | --list	# list available domains
+			 -m | --mods	# files modified in the last 24 hours
+			 -u | --uip		# ips used to log in to ftp or shell
+			 -h | --help	# more in-depth help text ]
+			 OR 
+	ferret [ -w | --web	domain	# list 200's sorted, counted
+			 -i | --ips	domain	# unique IP's
+			 -e | --err domain	# list 404's sorted, counted ]
+"
 }
 
 function lastarg() {	
@@ -183,7 +199,7 @@ function lastarg() {
 
 function validateargs { 
 	# If more than one argument is called, fail.
-	let "ARGCHK=IPS+MODS+VERRORS+UNQ+CHKD+LSTLOGS+HELP"
+	let "ARGCHK=IPS+MODS+VERRORS+WEB+CHKD+LSTLOGS+HELP+UIP"
 
 	if [ $ARGCHK = 1 ]
 	then
@@ -213,6 +229,13 @@ function checkDiskUsage {
     printf "%.2f%s\t%s\n", $1, UNIT, $2
    }'
 }
+
+function checkUserLogIPs {
+USER=${USER:0:8} 
+YLOG=/var/log/wtmp.1
+( last -i | grep $USER && last -if $YLOG | grep $USER ) | awk '{print $3}' | sort | uniq -c | sort -rn
+}
+
 
 function showUnique {
 if [ -s $ACCESS_LOG ]
@@ -286,7 +309,8 @@ function showVars {
 		echo "IPS = $IPS"
 		echo "VERRORS = $VERRORS"
 		echo "MODS = $MODS"
-		echo "UNQ = $UNQ"
+		echo "UIP = $UIP"
+		echo "WEB = $WEB"
 		echo "CHKD = $CHKD"
 		echo "LSTLOGS = $LSTLOGS"
 		echo "HELP = $HELP"
@@ -319,31 +343,35 @@ for arg in $* # Role through each case for every argument separated by a space.
 do
   case "$arg" in
 	# if -i
-	-i)
+	-i|--ips)
 		IPS=1
 		;;
 	# if -e
-	-e)
+	-e|--err)
 		VERRORS=1
 		;;
 	# if -m
-	-m)
+	-m|-mods)
 		MODS=1
 		;;
+	# if -w
+	-w|--web)
+		WEB=1
+		;;
 	# if -u
-	-u)
-		UNQ=1
+	-u|--uip)
+		UIP=1
 		;;
 	# if -c
-	-c)
+	-c|--chkd)
 		CHKD=1
 		;;
 	# if -help
-	-l)
+	-l|--list)
 		LSTLOGS=1
 		;;
 	# if -usage, use usage function
-	-h)
+	-h|--help)
 		HELP=1
 		;;
 	# second (last argument) verify...
@@ -370,8 +398,12 @@ elif [ "$index" = "3" ] && [ "$ARGCHK" = "1" ] && [ "$IPS" = "1" ] && [ "$ALOG" 
 then # - i  domain
 	echo "List of available domain folders with logs:"
 	listIPs
-elif [ "$index" = "3" ] && [ "$ARGCHK" = "1" ] && [ "$UNQ" = "1" ] && [ "$ALOG" = "1" ]
-then # -u domain
+elif [ "$index" = "2" ] && [ "$ARGCHK" = "1" ] && [ "$UIP" = "1" ]
+then # -u 
+	echo "List of ips logged by user $USER:"
+	checkUserLogIPs
+elif [ "$index" = "3" ] && [ "$ARGCHK" = "1" ] && [ "$WEB" = "1" ] && [ "$ALOG" = "1" ]
+then # -w domain
 	echo "Find unique requests in access log for $URI.
 Please wait..."
 	showUnique
@@ -387,7 +419,7 @@ Please wait..."
 	showModTimes
 elif [ "$index" = "2" ] && [ "$ARGCHK" = "1" ] && [ "$HELP" = "1" ]
 then # - h 
-	readme
+	readme | less
 elif [ "$index" = "2" ] && [ "$ARGCHK" = "1" ] && [ "$LSTLOGS" = "1" ]
 then # - l 
 	echo "List of available domain folders with logs:"
