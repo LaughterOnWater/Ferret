@@ -51,6 +51,9 @@ Attributions:
 Some of this code has been taken from Dreamhost's wiki page:
 http://wiki.dreamhost.com/Detecting_intrusions
 The tools have been collapsed together for use here.
+Myqlarson added most of the content on 
+this wikipage and has asked for specific attribution.
+Method Author: http://wiki.dreamhost.com/Special:Contributions/Myqlarson
 
 Instructions:
 Move this script into your home directory, perhaps
